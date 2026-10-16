@@ -43,7 +43,7 @@ const form = reactive<{
   name: '',
   color: PRESET_COLORS[0],
   icon: '',
-  type: 'curl',
+  type: 'shell',
   shell: 'auto',
   timeoutSec: 30,
   confirm: false,
@@ -77,7 +77,7 @@ watch(visible, (v) => {
     form.name = ''
     form.color = PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)]
     form.icon = ''
-    form.type = 'curl'
+    form.type = 'shell'
     form.shell = 'auto'
     form.timeoutSec = 30
     form.confirm = false
@@ -107,6 +107,10 @@ function save() {
   if (isScriptType.value) {
     if (!selectedScript.value) {
       ElMessage.warning(t('buttonDialog.scriptSelectRequired'))
+      return
+    }
+    if (!form.workdir.trim()) {
+      ElMessage.warning(t('buttonDialog.workdirRequired'))
       return
     }
   } else if (!form.script.trim()) {
@@ -204,7 +208,6 @@ function save() {
 
       <el-form-item :label="t('buttonDialog.type')">
         <el-radio-group v-model="form.type">
-          <el-radio value="curl">{{ t('buttonDialog.curl') }}</el-radio>
           <el-radio value="shell">{{ t('buttonDialog.shell') }}</el-radio>
           <el-radio value="script">{{ t('buttonDialog.scriptType') }}</el-radio>
         </el-radio-group>
@@ -212,7 +215,7 @@ function save() {
 
       <!-- 脚本类型：引用脚本库 + 工作目录 + 参数 -->
       <template v-if="isScriptType">
-        <el-form-item :label="t('buttonDialog.scriptRef')">
+        <el-form-item :label="t('buttonDialog.scriptRef')" required>
           <div class="script-ref-row">
             <el-select
               v-model="form.scriptId"
@@ -229,7 +232,7 @@ function save() {
           <CodeBlock :code="selectedScript.content" :lang="selectedScript.name" class="script-preview" />
         </el-form-item>
 
-        <el-form-item :label="t('buttonDialog.workdir')">
+        <el-form-item :label="t('buttonDialog.workdir')" required>
           <div class="script-ref-row">
             <el-input
               v-model="form.workdir"
@@ -252,7 +255,7 @@ function save() {
         </el-form-item>
       </template>
 
-      <!-- curl / shell 类型：内联脚本编辑 -->
+      <!-- shell 类型：内联脚本编辑 -->
       <el-form-item v-else :label="t('buttonDialog.script')">
         <CodeEditor
           v-model="form.script"
