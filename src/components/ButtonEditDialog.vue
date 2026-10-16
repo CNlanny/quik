@@ -23,6 +23,9 @@ const config = useConfigStore()
 
 const isEdit = computed(() => !!props.button)
 const isScriptType = computed(() => form.type === 'script')
+/** 编辑已有按钮时内联脚本编辑器默认收起，新建时直接展开 */
+const scriptEditorOpen = ref(true)
+const scriptLineCount = computed(() => form.script.split('\n').length)
 
 const form = reactive<{
   groupId: string
@@ -75,6 +78,7 @@ watch(visible, (v) => {
     form.scriptId = b.action.scriptId ?? ''
     form.workdir = b.action.workdir ?? ''
     form.args = b.action.args ?? ''
+    scriptEditorOpen.value = false
   } else {
     form.groupId = props.groupId || config.groups[0]?.id || ''
     form.name = ''
@@ -90,6 +94,7 @@ watch(visible, (v) => {
     form.scriptId = ''
     form.workdir = ''
     form.args = ''
+    scriptEditorOpen.value = true
   }
 })
 
@@ -234,7 +239,12 @@ function save() {
         </el-form-item>
 
         <el-form-item v-if="selectedScript" label=" ">
-          <CodeBlock :code="selectedScript.content" :lang="selectedScript.name" class="script-preview" />
+          <CodeBlock
+            :code="selectedScript.content"
+            :lang="selectedScript.name"
+            :expandable="isEdit"
+            class="script-preview"
+          />
         </el-form-item>
 
         <el-form-item :label="t('buttonDialog.workdir')" required>
@@ -262,12 +272,24 @@ function save() {
 
       <!-- shell 类型：内联脚本编辑 -->
       <el-form-item v-else :label="t('buttonDialog.script')">
-        <CodeEditor
-          v-model="form.script"
-          :lang="form.type"
-          :rows="8"
-          :placeholder="t('buttonDialog.scriptPh')"
-        />
+        <button
+          v-if="!scriptEditorOpen"
+          class="code-reveal"
+          type="button"
+          @click="scriptEditorOpen = true"
+        >
+          <span class="code-reveal-chev">▸</span>
+          {{ t('confirm.showScript', { n: scriptLineCount }) }}
+        </button>
+        <el-collapse-transition>
+          <CodeEditor
+            v-show="scriptEditorOpen"
+            v-model="form.script"
+            :lang="form.type"
+            :rows="8"
+            :placeholder="t('buttonDialog.scriptPh')"
+          />
+        </el-collapse-transition>
       </el-form-item>
 
       <el-form-item :label="t('buttonDialog.shellLabel')">
