@@ -1,4 +1,4 @@
-//! 系统托盘（R-105/R-107）：最小化隐藏到托盘后台常驻，左键点托盘恢复，右键菜单可退出
+//! 系统托盘（R-105/R-107）：托盘后台常驻，左键点托盘恢复，右键菜单可退出
 //! 关闭行为由配置 closeAction 决定：ask 弹窗询问（前端渲染）/ tray 隐藏 / exit 退出
 //! 菜单文案跟随界面语言（config.settings.language），语言切换后由前端调 refresh_tray_menu 重建
 
@@ -87,32 +87,23 @@ fn show_main_window(app: &AppHandle) {
     }
 }
 
-/// 关闭行为按配置分流（ask/tray/exit）；最小化始终隐藏到托盘。真正退出走托盘菜单或 ask 弹窗
+/// 关闭行为按配置分流（ask/tray/exit）。真正退出走托盘菜单或 ask 弹窗
 pub fn handle_window_event(window: &Window, event: &WindowEvent) {
     if window.label() != "main" {
         return;
     }
-    match event {
-        WindowEvent::CloseRequested { api, .. } => {
-            api.prevent_close();
-            let app = window.app_handle();
-            match crate::config::read_settings(app).close_action.as_str() {
-                "exit" => app.exit(0),
-                "tray" => {
-                    let _ = window.hide();
-                }
-                // ask：交给前端弹窗询问，用户选择后回调 quit_app / hide_to_tray
-                _ => {
-                    let _ = window.emit("close-ask", ());
-                }
-            }
-        }
-        // Windows 上点最小化会触发一次 0x0 的 Resized，配合 is_minimized 判定后再隐藏
-        WindowEvent::Resized(size) => {
-            if size.width == 0 && size.height == 0 && window.is_minimized().unwrap_or(false) {
+    if let WindowEvent::CloseRequested { api, .. } = event {
+        api.prevent_close();
+        let app = window.app_handle();
+        match crate::config::read_settings(app).close_action.as_str() {
+            "exit" => app.exit(0),
+            "tray" => {
                 let _ = window.hide();
             }
+            // ask：交给前端弹窗询问，用户选择后回调 quit_app / hide_to_tray
+            _ => {
+                let _ = window.emit("close-ask", ());
+            }
         }
-        _ => {}
     }
 }
