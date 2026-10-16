@@ -63,6 +63,8 @@ export default {
     confirmTip: '点击按钮时先弹窗确认，适合危险操作',
     showScriptLabel: '显示脚本内容',
     showScriptTip: '关闭后，运行输出中只显示日志，不显示执行的脚本',
+    allowConcurrentLabel: '允许并发执行',
+    allowConcurrentTip: '开启后执行中可再次点击同时运行；关闭时执行中不可重复触发',
     script: '脚本',
     scriptPh: 'curl -s https://example.com\n# 支持多行与管道，如 | jq',
     format: '格式化',

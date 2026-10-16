@@ -111,6 +111,8 @@ pub struct Button {
     /// 运行输出中是否显示脚本内容；旧配置缺省该字段时保持原行为（显示）
     #[serde(default = "default_true")]
     pub show_script: bool,
+    /// 是否允许并发执行；旧配置缺省该字段时保持原行为（执行中不可重复触发）
+    pub allow_concurrent: bool,
     pub action: Action,
     pub order: u32,
 }
@@ -128,6 +130,7 @@ impl Default for Button {
             icon: String::new(),
             confirm: false,
             show_script: true,
+            allow_concurrent: false,
             action: Default::default(),
             order: 0,
         }
@@ -199,6 +202,7 @@ impl Default for AppConfig {
                         icon: "🌐".into(),
                         confirm: false,
                         show_script: true,
+                        allow_concurrent: false,
                         order: 1,
                         action: Action {
                             action_type: "curl".into(),
@@ -214,6 +218,7 @@ impl Default for AppConfig {
                         icon: "⚡".into(),
                         confirm: false,
                         show_script: true,
+                        allow_concurrent: false,
                         order: 2,
                         action: Action {
                             action_type: "shell".into(),
@@ -229,6 +234,7 @@ impl Default for AppConfig {
                         icon: "📜".into(),
                         confirm: false,
                         show_script: true,
+                        allow_concurrent: false,
                         order: 3,
                         action: Action {
                             action_type: "script".into(),

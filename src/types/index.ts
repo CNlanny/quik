@@ -37,6 +37,8 @@ export interface ButtonItem {
   confirm: boolean
   /** 运行输出中是否显示脚本内容（false = 日志框只显示日志） */
   showScript: boolean
+  /** 是否允许并发执行（false = 执行中不可再次触发） */
+  allowConcurrent: boolean
   action: ActionConfig
   order: number
 }
@@ -117,5 +119,6 @@ export interface ButtonFormData {
   icon: string
   confirm: boolean
   showScript: boolean
+  allowConcurrent: boolean
   action: ActionConfig
 }

@@ -369,6 +369,72 @@ body,
   transform: scale(1);
 }
 
+/* ===== 禁止运行态：不允许并发的按钮执行中悬停时的提示 ===== */
+.btn-card.is-blocked {
+  cursor: not-allowed;
+}
+
+/* 悬停仍保留抬升，但去掉强调色光晕，改用中性阴影 */
+.btn-card.is-blocked:hover {
+  box-shadow:
+    0 8px 16px -6px rgba(16, 24, 40, 0.12),
+    0 2px 4px rgba(16, 24, 40, 0.05);
+}
+
+/* 点击无效：不给按压下沉反馈 */
+.btn-card.is-blocked:active {
+  transform: translateY(-4px) scale(1.02);
+  transition-duration: 0.26s;
+}
+
+/* 禁止徽标：红色禁止圈，悬停浮现时抖动一下示意「拒绝」 */
+.btn-ban-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--el-color-danger, #f56c6c);
+  opacity: 0;
+  transform: scale(0.75);
+  transition:
+    opacity 0.18s ease,
+    transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.btn-ban-hint svg {
+  width: 42px;
+  height: 42px;
+  filter: drop-shadow(0 6px 14px rgba(245, 108, 108, 0.28));
+}
+
+/* 用独立 rotate 属性做抖动，避免覆盖上面的 scale 过渡 */
+.btn-card.is-blocked:hover .btn-ban-hint {
+  opacity: 1;
+  transform: scale(1);
+  animation: deny-shake 0.5s ease-in-out;
+}
+
+@keyframes deny-shake {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  20% {
+    rotate: -6deg;
+  }
+  40% {
+    rotate: 5deg;
+  }
+  60% {
+    rotate: -4deg;
+  }
+  80% {
+    rotate: 3deg;
+  }
+}
+
 .btn-icon {
   width: 36px;
   height: 36px;
@@ -538,8 +604,13 @@ body,
   .btn-card,
   .btn-card:hover,
   .btn-card:active,
+  .btn-card.is-blocked,
+  .btn-card.is-blocked:hover,
+  .btn-card.is-blocked:active,
   .btn-content,
-  .btn-run-hint {
+  .btn-run-hint,
+  .btn-ban-hint,
+  .btn-card.is-blocked:hover .btn-ban-hint {
     transition: none;
     animation: none;
     transform: none;

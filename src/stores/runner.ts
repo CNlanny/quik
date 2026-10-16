@@ -102,7 +102,8 @@ export const useRunnerStore = defineStore('runner', () => {
 
   async function runButton(button: ButtonItem) {
     const t = i18n.global.t
-    if (statusOf(button.id) === 'running') return
+    // 未开启并发时，执行中不允许再次触发
+    if (!button.allowConcurrent && statusOf(button.id) === 'running') return
 
     const cfg = useConfigStore().config
     const env = cfg?.environments.find((e) => e.id === cfg.activeEnvId)

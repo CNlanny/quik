@@ -24,6 +24,9 @@ const runner = useRunnerStore()
 
 const status = computed(() => runner.statusOf(props.button.id))
 
+/** 不允许并发且执行中：悬停时以「禁止运行」徽标替代播放徽标 */
+const blocked = computed(() => status.value === 'running' && !props.button.allowConcurrent)
+
 /* ---- 右键菜单：跟随鼠标位置弹出 ---- */
 const cardEl = ref<HTMLElement | null>(null)
 const menuEl = ref<HTMLElement | null>(null)
@@ -103,6 +106,7 @@ function onCommand(cmd: string) {
         icon: props.button.icon,
         confirm: props.button.confirm,
         showScript: props.button.showScript,
+        allowConcurrent: props.button.allowConcurrent,
         action: { ...props.button.action }
       })
     }
@@ -125,7 +129,7 @@ function onCommand(cmd: string) {
   <div
     ref="cardEl"
     class="btn-card"
-    :class="[`st-${status ?? 'idle'}`]"
+    :class="[`st-${status ?? 'idle'}`, { 'is-blocked': blocked }]"
     :style="cardStyle"
     draggable="true"
     :title="button.name"
@@ -143,7 +147,7 @@ function onCommand(cmd: string) {
       <span class="btn-type">{{ button.action.type }}</span>
     </div>
 
-    <span class="btn-run-hint" aria-hidden="true">
+    <span v-if="!blocked" class="btn-run-hint" aria-hidden="true">
       <svg viewBox="0 0 48 48">
         <circle cx="24" cy="24" r="21" fill="currentColor" />
         <!-- 三角形按 48×48 视框几何居中（含描边外扩） -->
@@ -153,6 +157,23 @@ function onCommand(cmd: string) {
           stroke="#fff"
           stroke-width="3"
           stroke-linejoin="round"
+        />
+      </svg>
+    </span>
+
+    <!-- 禁止运行徽标：不允许并发的按钮执行中悬停时显示 -->
+    <span v-if="blocked" class="btn-ban-hint" aria-hidden="true">
+      <svg viewBox="0 0 48 48">
+        <!-- 禁止圈 + 45° 斜杠，两端落在圆周上（r=19） -->
+        <circle cx="24" cy="24" r="19" fill="none" stroke="currentColor" stroke-width="4.5" />
+        <line
+          x1="10.6"
+          y1="10.6"
+          x2="37.4"
+          y2="37.4"
+          stroke="currentColor"
+          stroke-width="4.5"
+          stroke-linecap="round"
         />
       </svg>
     </span>

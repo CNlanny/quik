@@ -63,6 +63,8 @@ export default {
     confirmTip: 'Ask for confirmation when clicked. Recommended for dangerous operations',
     showScriptLabel: 'Show script in output',
     showScriptTip: 'When off, the output panel shows logs only, without the executed script',
+    allowConcurrentLabel: 'Allow concurrent runs',
+    allowConcurrentTip: 'When on, the button can be triggered again while still running; when off, repeated clicks are ignored until it finishes',
     script: 'Script',
     scriptPh: 'curl -s https://example.com\n# multiline & pipes supported, e.g. | jq',
     format: 'Format',
