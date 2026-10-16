@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import type { CSSProperties } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -24,6 +24,65 @@ const runner = useRunnerStore()
 
 const status = computed(() => runner.statusOf(props.button.id))
 
+/* ---- 右键菜单：跟随鼠标位置弹出 ---- */
+const cardEl = ref<HTMLElement | null>(null)
+const menuEl = ref<HTMLElement | null>(null)
+const menuVisible = ref(false)
+const menuX = ref(0)
+const menuY = ref(0)
+
+function openMenu(e: MouseEvent) {
+  menuX.value = e.clientX
+  menuY.value = e.clientY
+  menuVisible.value = true
+  // 渲染后按菜单实际尺寸收缩坐标，避免贴着窗口右/下边缘被裁掉
+  nextTick(() => {
+    const el = menuEl.value
+    if (!el) return
+    menuX.value = Math.max(8, Math.min(menuX.value, window.innerWidth - el.offsetWidth - 8))
+    menuY.value = Math.max(8, Math.min(menuY.value, window.innerHeight - el.offsetHeight - 8))
+  })
+}
+
+/** 目标不在本卡片和本菜单内时才关闭（右键本卡片会重新定位而非关闭） */
+function isOutside(e: Event) {
+  const node = e.target as Node
+  return !cardEl.value?.contains(node) && !menuEl.value?.contains(node)
+}
+
+function onDocMousedown(e: MouseEvent) {
+  if (menuVisible.value && isOutside(e)) menuVisible.value = false
+}
+
+function onDocContextMenu(e: MouseEvent) {
+  if (menuVisible.value && isOutside(e)) menuVisible.value = false
+}
+
+function onDocKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') menuVisible.value = false
+}
+
+function closeOnScrollOrResize() {
+  menuVisible.value = false
+}
+
+onMounted(() => {
+  document.addEventListener('mousedown', onDocMousedown)
+  document.addEventListener('contextmenu', onDocContextMenu)
+  document.addEventListener('keydown', onDocKeydown)
+  // scroll 用捕获：容器内部滚动不冒泡也能关掉菜单
+  window.addEventListener('scroll', closeOnScrollOrResize, true)
+  window.addEventListener('resize', closeOnScrollOrResize)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', onDocMousedown)
+  document.removeEventListener('contextmenu', onDocContextMenu)
+  document.removeEventListener('keydown', onDocKeydown)
+  window.removeEventListener('scroll', closeOnScrollOrResize, true)
+  window.removeEventListener('resize', closeOnScrollOrResize)
+})
+
 /** 卡片以浅色主题呈现：自定义色作为强调色（图标底、悬停阴影、边框）注入 CSS 变量 */
 const cardStyle = computed<CSSProperties>(() => ({
   '--accent': props.button.color,
@@ -32,6 +91,7 @@ const cardStyle = computed<CSSProperties>(() => ({
 }))
 
 function onCommand(cmd: string) {
+  menuVisible.value = false
   if (cmd === 'edit') {
     emit('edit', props.button)
   } else if (cmd === 'duplicate') {
@@ -63,28 +123,19 @@ function onCommand(cmd: string) {
 
 <template>
   <div
+    ref="cardEl"
     class="btn-card"
     :class="[`st-${status ?? 'idle'}`]"
     :style="cardStyle"
     draggable="true"
     :title="button.name"
     @click="emit('run', button)"
+    @contextmenu.prevent="openMenu"
     @dragstart="emit('dragStart', button.id)"
     @dragend="emit('dragEnd')"
     @dragover.prevent
     @drop.prevent="emit('dropOn', button.id)"
   >
-    <el-dropdown class="btn-menu" trigger="click" @command="onCommand">
-      <span class="menu-dots" @click.stop>⋯</span>
-      <template #dropdown>
-        <el-dropdown-menu>
-          <el-dropdown-item command="edit">{{ t('common.edit') }}</el-dropdown-item>
-          <el-dropdown-item command="duplicate">{{ t('common.duplicate') }}</el-dropdown-item>
-          <el-dropdown-item command="delete" divided>{{ t('common.delete') }}</el-dropdown-item>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown>
-
     <!-- 内容层：悬停时整体模糊淡出，为播放徽标让位 -->
     <div class="btn-content">
       <span class="btn-icon">{{ button.icon || (button.action.type === 'curl' ? '🌐' : button.action.type === 'script' ? '📜' : '⚡') }}</span>
@@ -95,10 +146,32 @@ function onCommand(cmd: string) {
     <span class="btn-run-hint" aria-hidden="true">
       <svg viewBox="0 0 48 48">
         <circle cx="24" cy="24" r="21" fill="currentColor" />
-        <path d="M20.5 15.8v16.4c0 1.2 1.3 1.9 2.3 1.3l13-8.2c1-.6 1-2 0-2.6l-13-8.2c-1-.6-2.3.1-2.3 1.3z" fill="#fff" />
+        <!-- 三角形按 48×48 视框几何居中（含描边外扩） -->
+        <path
+          d="M16.75 14.5v19l14.5-9.5z"
+          fill="#fff"
+          stroke="#fff"
+          stroke-width="3"
+          stroke-linejoin="round"
+        />
       </svg>
     </span>
 
     <span v-if="status === 'running'" class="btn-spinner"></span>
   </div>
+
+  <!-- 右键菜单：固定定位在鼠标位置，挂到 body 避免被卡片 overflow 裁剪 -->
+  <Teleport to="body">
+    <div
+      v-if="menuVisible"
+      ref="menuEl"
+      class="ctx-menu"
+      :style="{ left: `${menuX}px`, top: `${menuY}px` }"
+    >
+      <div class="ctx-item" @click="onCommand('edit')">{{ t('common.edit') }}</div>
+      <div class="ctx-item" @click="onCommand('duplicate')">{{ t('common.duplicate') }}</div>
+      <div class="ctx-sep"></div>
+      <div class="ctx-item is-danger" @click="onCommand('delete')">{{ t('common.delete') }}</div>
+    </div>
+  </Teleport>
 </template>

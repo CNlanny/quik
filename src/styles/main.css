@@ -396,28 +396,59 @@ body,
   letter-spacing: 0.5px;
 }
 
-.btn-menu {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  opacity: 0;
-  transform: translateY(-3px);
-  pointer-events: none;
+/* ===== 卡片右键菜单：固定定位跟随鼠标，Teleport 到 body ===== */
+.ctx-menu {
+  position: fixed;
+  z-index: 3000;
+  min-width: 148px;
+  padding: 4px;
+  background: var(--panel-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.12);
+  transform-origin: top left;
+  animation: ctx-in 0.12s ease-out;
+}
+
+.ctx-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 13px;
+  color: var(--text-main);
+  cursor: pointer;
+  user-select: none;
   transition:
-    opacity 0.18s ease,
-    transform 0.18s ease;
+    background 0.12s ease,
+    color 0.12s ease;
 }
 
-.btn-card:hover .btn-menu {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
-  display: inline-flex;
+.ctx-item:hover {
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
 }
 
-.btn-menu .menu-dots {
-  color: var(--text-sub);
-  opacity: 0.8;
+.ctx-item.is-danger:hover {
+  background: var(--el-color-danger-light-9, #fef0f0);
+  color: var(--el-color-danger);
+}
+
+.ctx-sep {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--border);
+}
+
+@keyframes ctx-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* 执行中：边框呼吸灯 */
@@ -503,8 +534,7 @@ body,
   .btn-card:hover,
   .btn-card:active,
   .btn-content,
-  .btn-run-hint,
-  .btn-menu {
+  .btn-run-hint {
     transition: none;
     animation: none;
     transform: none;
@@ -523,9 +553,8 @@ body,
     transform: none;
   }
 
-  .btn-card:hover .btn-menu {
-    opacity: 1;
-    transform: none;
+  .ctx-menu {
+    animation: none;
   }
 }
 
