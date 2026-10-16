@@ -37,6 +37,14 @@ const tagType = computed(() => {
   }
 })
 
+// 执行按钮（含面板上的重跑）时自动展开，日志立即可见；手动折叠不被覆盖
+watch(
+  () => runner.focusRunId,
+  (id) => {
+    if (id) collapsed.value = false
+  }
+)
+
 // 新输出到达时自动滚动到底部
 watch(
   () => run.value?.chunks.length,

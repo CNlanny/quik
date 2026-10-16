@@ -48,8 +48,9 @@ body,
   background: var(--bg);
 }
 
-/* ===== 整体布局：灰底画布，侧栏悬浮、主内容/控制台为圆角浮层 ===== */
+/* ===== 整体布局：灰底画布，侧栏悬浮、主内容为圆角浮层 ===== */
 .app-shell {
+  position: relative;
   display: grid;
   grid-template-columns: 232px 1fr;
   grid-template-rows: 1fr auto;
@@ -616,7 +617,9 @@ body,
   opacity: 0.55;
 }
 
-/* ===== 输出面板（深色控制台浮层） ===== */
+/* ===== 输出面板（深色控制台）=====
+   收起：正常占据网格第二行，只有一条头的高度，不遮挡任何内容；
+   展开：脱离文档流悬浮在主内容之上，不挤压上方布局。 */
 .output-panel {
   grid-column: 1 / -1;
   grid-row: 2;
@@ -628,6 +631,20 @@ body,
   overflow: hidden;
   min-height: 0;
   box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
+}
+
+.output-panel:not(.collapsed) {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  z-index: 20;
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.3);
+}
+
+/* 面板展开悬浮时，网格底部留出滚动余量，最后一行卡片能滚到面板上方 */
+.app-shell:has(.output-panel:not(.collapsed)) .button-grid-scroll {
+  padding-bottom: 300px;
 }
 
 .output-header {
