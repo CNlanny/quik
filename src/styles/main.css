@@ -1225,6 +1225,13 @@ body,
   border-radius: 14px;
 }
 
+/* 弹窗打开时 Element Plus 会给 body 设 width: calc(100% - 滚动条宽度) 来补偿
+   页面滚动条；本应用布局恒为视口高度、不存在页面滚动条，收窄只会让整个
+   界面容器跟着变小跳动（窗口化时尤其明显）。用 !important 覆盖内联样式禁用。 */
+body.el-popup-parent--hidden {
+  width: 100% !important;
+}
+
 /* 编辑弹窗：append-to-body 后脱离主页面，成为独立浮层；
    限高防止超出窗口，内容区内部滚动，保存/取消按钮始终可见 */
 .edit-dialog {
@@ -1243,6 +1250,8 @@ body,
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  /* 常驻预留滚动条槽位：内容超高出现滚动条时表单不再被挤压变窄 */
+  scrollbar-gutter: stable;
 }
 
 .edit-dialog .el-dialog__footer {
