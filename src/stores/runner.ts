@@ -214,6 +214,12 @@ export const useRunnerStore = defineStore('runner', () => {
       state.durationMs = r.durationMs
       state.status = r.killed ? 'stopped' : r.success ? 'success' : 'fail'
       if (r.timedOut) state.error = 'timeout'
+      // 终态收尾日志：与「正在强制终止进程…」呼应，让用户明确看到停止/超时已完成
+      if (r.killed) {
+        appendSystem(state.runId, i18n.global.t('output.stopDone'))
+      } else if (r.timedOut) {
+        appendSystem(state.runId, i18n.global.t('output.timeoutDone'))
+      }
     } catch (e) {
       state.status = 'fail'
       state.error = String(e)

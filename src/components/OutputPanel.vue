@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useConfigStore } from '../stores/config'
 import { useRunnerStore } from '../stores/runner'
 import { highlightShell } from '../utils/highlight'
@@ -61,6 +61,26 @@ async function rerun() {
   if (button) await runner.runButton(button)
 }
 
+/** 停止前确认，防止误点（停止会强制终止整棵进程树） */
+async function confirmStop() {
+  if (!run.value || run.value.status !== 'running') return
+  try {
+    await ElMessageBox.confirm(
+      t('output.stopConfirm', { name: run.value.buttonName }),
+      t('output.stop'),
+      {
+        type: 'warning',
+        confirmButtonText: t('output.stop'),
+        cancelButtonText: t('common.cancel'),
+        confirmButtonClass: 'el-button--danger'
+      }
+    )
+  } catch {
+    return
+  }
+  await runner.stopFocus()
+}
+
 async function copyAll() {
   if (!run.value) return
   try {
@@ -84,7 +104,7 @@ async function copyAll() {
           {{ t('output.duration') }}: {{ run.durationMs }}{{ t('output.ms') }}
         </span>
         <span class="spacer"></span>
-        <el-button v-if="run.status === 'running'" size="small" type="danger" plain @click="runner.stopFocus()">
+        <el-button v-if="run.status === 'running'" size="small" type="danger" plain @click="confirmStop()">
           {{ t('output.stop') }}
         </el-button>
         <el-button v-else size="small" @click="rerun">{{ t('output.rerun') }}</el-button>

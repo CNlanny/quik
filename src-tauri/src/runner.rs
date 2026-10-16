@@ -1,8 +1,10 @@
 //! 动作执行器：spawn 子进程执行 curl/shell 脚本，流式回传输出，支持停止与超时
 //!
-//! 停止机制（双保险）：
-//! 1. Notify 通知 → tokio 原生 child.kill() 杀直接子进程（bash/powershell 本体）
-//! 2. taskkill /T /F 按 PID 杀整棵进程树（bash 派生的 curl 等子孙进程）
+//! 停止/超时机制（顺序至关重要）：
+//! 1. taskkill /PID <pid> /T /F 按 PID 杀整棵进程树 —— 必须在直接子进程（树根）存活时执行。
+//!    git-bash 的 bin\bash.exe 会再派生真正的脚本进程（孙进程）：若先原生 kill 杀掉树根，
+//!    taskkill 将因"找不到进程"无法枚举子孙，孙进程成为孤儿继续运行（停止失效的根因）。
+//! 2. Notify 通知 → tokio 原生 child.kill() 回收直接子进程并结束等待。
 //! 全链路写入调试日志（logs.rs → 应用数据目录 quik.log）
 
 use crate::logs::log_line;
@@ -305,7 +307,11 @@ fn build_command(
     Ok(cmd)
 }
 
-/// 等待进程退出；可被 Notify 中断并原生 kill；返回 (ExitStatus, 是否超时)
+/// 等待进程退出；可被 Notify 中断（先杀进程树再回收直接子进程）；返回 (ExitStatus, 是否超时)
+///
+/// notify 触发时的杀进程顺序与 stop_action 一致：先 taskkill /T /F 杀整棵树
+/// （树根存活才能枚举子孙进程），再原生 kill 回收直接子进程。超时路径复用同一逻辑，
+/// 否则超时后孙进程（bash 再派生的脚本进程）会漏杀继续运行。
 async fn wait_with_kill_switch(
     mut child: Child,
     notify: Arc<Notify>,
@@ -317,7 +323,13 @@ async fn wait_with_kill_switch(
         tokio::select! {
             st = child.wait() => { let _ = tx.send(st); }
             _ = notify_in.notified() => {
-                // 原生 kill 直接子进程；子孙进程由 stop_action 的 taskkill /T 处理
+                // 1) 树根存活时先杀整棵进程树（孙进程一并终止）
+                if let Some(pid) = child.id() {
+                    if let Err(e) = kill_tree(pid).await {
+                        log_line(&format!("timeout kill_tree pid={pid} FAILED: {e}"));
+                    }
+                }
+                // 2) 原生 kill 回收直接子进程（可能已被 taskkill 结束，幂等）
                 let _ = child.kill().await;
                 let st = child.wait().await;
                 let _ = tx.send(st);
@@ -466,14 +478,15 @@ pub async fn stop_action(run_id: String) -> Result<bool, String> {
     KILLED.lock().await.insert(run_id);
     match handle {
         Some(h) => {
-            // 双保险：原生 kill 直接子进程 + taskkill 杀整棵进程树
-            h.notify.notify_one();
+            // 顺序至关重要：先 taskkill /T /F 杀整棵进程树（此时树根存活，可枚举子孙），
+            // 再 notify 原生 kill 回收直接子进程。反序会导致树根先死、孙进程漏杀。
             if let Some(pid) = h.pid {
                 match kill_tree(pid).await {
                     Ok(()) => log_line(&format!("stop_action kill_tree pid={pid} ok")),
                     Err(e) => log_line(&format!("stop_action kill_tree pid={pid} FAILED: {e}")),
                 }
             }
+            h.notify.notify_one();
             Ok(true)
         }
         None => {
