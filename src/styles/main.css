@@ -48,19 +48,34 @@ body,
   background: var(--bg);
 }
 
-/* ===== 整体布局：灰底画布，侧栏悬浮、主内容为圆角浮层 ===== */
+/* ===== 整体布局：灰底画布，侧栏与主内容占上行，日志面板独占底行 ===== */
 .app-shell {
   position: relative;
   display: grid;
   grid-template-columns: 232px 1fr;
-  grid-template-rows: 1fr;
+  grid-template-rows: 1fr auto;
   gap: 10px;
   height: 100vh;
   padding: 10px;
   background: var(--bg);
 }
 
+/* 日志面板横跨整行，独占底部（不悬浮、不遮挡任何内容） */
+.output-panel {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  background: var(--console-bg);
+  border: 1px solid #14161a;
+  border-radius: 14px;
+  overflow: hidden;
+  min-height: 0;
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.3);
+}
+
 .app-main {
+  grid-row: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -72,7 +87,7 @@ body,
   box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
 }
 
-/* ===== 侧边栏（透明，浮在画布上） ===== */
+/* ===== 侧边栏（透明，占网格第一行） ===== */
 .sidebar {
   grid-row: 1;
   display: flex;
@@ -233,11 +248,9 @@ body,
 .button-grid-scroll {
   flex: 1;
   overflow-y: auto;
-  /* 常驻预留滚动条槽位：日志面板展开时滚动条出现不再挤压按钮卡片 */
+  /* 常驻预留滚动条槽位：滚动条出现不再挤压按钮卡片 */
   scrollbar-gutter: stable;
   padding: 18px;
-  /* 收起态日志栏悬浮在底部，常驻滚动余量让最后一行卡片能滚到栏上方 */
-  padding-bottom: 64px;
   min-height: 0;
 }
 
@@ -693,35 +706,7 @@ body,
 }
 
 /* ===== 输出面板（深色控制台）=====
-   始终绝对定位悬浮在主内容之上：收起仅剩一条头、展开为完整控制台。
-   两种状态都不占网格行，主内容区尺寸保持不变，切换时布局不跳动。 */
-.output-panel {
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: 10px;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  background: var(--console-bg);
-  border: 1px solid #14161a;
-  border-radius: 14px;
-  overflow: hidden;
-  min-height: 0;
-  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.3);
-}
-
-/* 面板展开（高 258px+）悬浮时，网格底部留出足够滚动余量，最后一行卡片能滚到面板上方 */
-.app-shell:has(.output-panel:not(.collapsed)) .button-grid-scroll {
-  /* 面板实际高度 ≈ 头部 34px + 日志体 220px + 底部偏移 10px，留少量余量 */
-  padding-bottom: 270px;
-}
-
-/* 脚本库 / 设置页的滚动区同样避开底部悬浮栏 */
-.app-shell .settings-scroll {
-  padding-bottom: 56px;
-}
-
+   样式规则已上移至顶部 .app-shell 布局区（独占底部网格行），此处仅保留面板内部元素样式 */
 .output-header {
   display: flex;
   align-items: center;
