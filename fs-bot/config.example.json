@@ -1,0 +1,11 @@
+{
+  "appId": "cli_xxxxxxxxxxxxxxxx",
+  "appSecret": "",
+  "webhookUrl": "",
+  "webhookSecret": "",
+  "forwardP2P": true,
+  "includeGroups": [],
+  "excludeGroups": [],
+  "p2pLabel": "私聊（手动转发）",
+  "prefix": "📮 个人飞书"
+}

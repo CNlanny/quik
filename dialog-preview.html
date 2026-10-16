@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>确认弹窗预览</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      // 临时预览页：脱离 Tauri 后端单独渲染「确认执行」弹窗，用于调整样式。用完即删。
+      import { createApp, h, onMounted } from 'vue'
+      import ElementPlus, { ElMessageBox } from 'element-plus'
+      import 'element-plus/dist/index.css'
+      import './src/styles/main.css'
+      import { i18n } from './src/i18n'
+      import CodeBlock from './src/components/CodeBlock.vue'
+
+      const button = {
+        name: '登录接口健康检查',
+        icon: '🌐',
+        action: {
+          type: 'curl',
+          shell: 'auto',
+          timeoutSec: 30,
+          script: `curl -s -X POST https://api.example.com/login \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer {{token}}" \\
+  -d '{"user":"demo","pass":"123456"}' | jq .`
+        }
+      }
+
+      function show() {
+        const t = i18n.global.t
+        const shellLabel = t('confirm.shellAuto')
+        ElMessageBox.confirm(
+          h('div', { class: 'confirm-run' }, [
+            h('p', { class: 'confirm-run-name' }, [
+              button.icon ? h('span', { class: 'confirm-run-name-icon' }, button.icon) : null,
+              h('span', { class: 'confirm-run-name-text' }, button.name)
+            ]),
+            h('div', { class: 'confirm-run-meta' }, [
+              h('span', { class: 'confirm-meta-chip is-type' }, button.action.type),
+              h('span', { class: 'confirm-meta-chip' }, shellLabel),
+              h('span', { class: 'confirm-meta-chip' }, t('confirm.metaTimeout', { n: button.action.timeoutSec }))
+            ]),
+            h(CodeBlock, {
+              code: button.action.script,
+              lang: button.action.type,
+              expandable: true
+            })
+          ]),
+          t('confirm.runTitle'),
+          {
+            confirmButtonText: t('common.run'),
+            cancelButtonText: t('common.cancel'),
+            customClass: 'run-confirm'
+          }
+        ).catch(() => {})
+      }
+
+      const app = createApp({
+        setup() {
+          onMounted(show)
+          return () =>
+            h('div', { style: 'padding: 60px' }, [
+              h('button', { onClick: show, class: 'el-button' }, '重新打开弹窗')
+            ])
+        }
+      })
+      app.use(ElementPlus)
+      app.use(i18n)
+      app.mount('#app')
+    </script>
+  </body>
+</html>
