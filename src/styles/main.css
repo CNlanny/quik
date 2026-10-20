@@ -300,7 +300,8 @@ body,
   align-items: stretch;
 }
 
-/* ===== 按钮卡片：正方形白底 + 自定义色作为强调色（--accent 系列 CSS 变量） ===== */
+/* ===== 按钮卡片：颜色铺满整卡（--card-fill 由 buttonStyle 计算：纯色/渐变/毛玻璃半透明），
+   --btn-fg 系列按底色亮度自动取黑/白保证可读；形状与圆角不变 ===== */
 .btn-card {
   position: relative;
   display: flex;
@@ -308,34 +309,75 @@ body,
   aspect-ratio: 1;
   border-radius: 10px;
   padding: 10px 8px;
-  background: var(--panel-bg);
-  border: 1px solid var(--card-border);
+  background: var(--card-fill, var(--panel-bg));
+  border: 1px solid var(--accent-deep, var(--card-border));
   cursor: pointer;
   user-select: none;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  color: var(--btn-fg, var(--text-main));
+  /* 文字字体/斜体对整卡生效（名称与类型标签一起换），字重字号只作用于名称 */
+  font-family: var(--btn-family, inherit);
+  font-style: var(--btn-style, normal);
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.05),
+    var(--fx-shadow, 0 0 0 rgba(0, 0, 0, 0));
   /* 轻微回弹的曲线：抬起快、落回时有一点点弹性 */
   transition:
     transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1),
     box-shadow 0.26s ease,
-    border-color 0.26s ease;
+    border-color 0.26s ease,
+    filter 0.26s ease;
   overflow: hidden;
+}
+
+/* 毛玻璃特效：半透明填充 + 背景模糊，强度由 --glass-blur 控制（形状不变） */
+.btn-card.fx-glass {
+  backdrop-filter: blur(var(--glass-blur, 8px)) saturate(1.35);
+  -webkit-backdrop-filter: blur(var(--glass-blur, 8px)) saturate(1.35);
 }
 
 .btn-card:hover {
   transform: translateY(-4px) scale(1.02);
+  filter: brightness(1.05) saturate(1.03);
   border-color: var(--accent-deep, var(--el-color-primary-light-5));
   box-shadow:
     0 12px 24px -6px var(--accent-soft, rgba(78, 110, 242, 0.18)),
-    0 3px 6px rgba(16, 24, 40, 0.06);
+    0 3px 6px rgba(16, 24, 40, 0.06),
+    var(--fx-shadow-hover, 0 0 0 rgba(0, 0, 0, 0));
 }
 
 /* 按压：快速下沉缩紧，松手靠弹性曲线回弹 */
 .btn-card:active {
   transform: translateY(-1px) scale(0.97);
   transition-duration: 0.08s;
+  filter: brightness(0.97);
   box-shadow:
     0 2px 6px -2px var(--accent-soft, rgba(78, 110, 242, 0.14)),
     0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+/* 弹窗内的实时预览卡片：复用卡片视觉，去掉交互反馈 */
+.btn-card.is-preview {
+  width: 122px;
+  cursor: default;
+}
+
+.btn-card.is-preview:hover {
+  transform: none;
+  filter: none;
+  border-color: var(--accent-deep, var(--card-border));
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.05),
+    var(--fx-shadow, 0 0 0 rgba(0, 0, 0, 0));
+}
+
+.btn-card.is-preview:active {
+  transform: none;
+  filter: none;
+}
+
+.btn-card.is-preview:hover .btn-content {
+  filter: none;
+  opacity: 1;
 }
 
 /* 内容层：悬停时整体模糊并半透明，让「点击执行」的播放徽标接管视觉焦点 */
@@ -355,14 +397,13 @@ body,
   opacity: 0.35;
 }
 
-/* 悬停播放徽标：自定义色圆底 + 白色三角，提示点击可执行 */
+/* 悬停播放徽标：白色圆底 + 深色三角（SVG 内固定配色），提示点击可执行 */
 .btn-run-hint {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent, var(--el-color-primary));
   opacity: 0;
   transform: scale(0.75);
   transition:
@@ -387,16 +428,18 @@ body,
   cursor: not-allowed;
 }
 
-/* 悬停仍保留抬升，但去掉强调色光晕，改用中性阴影 */
+/* 悬停仍保留抬升，但去掉提亮与强调色光晕，改用中性阴影 */
 .btn-card.is-blocked:hover {
+  filter: none;
   box-shadow:
     0 8px 16px -6px rgba(16, 24, 40, 0.12),
     0 2px 4px rgba(16, 24, 40, 0.05);
 }
 
-/* 点击无效：不给按压下沉反馈 */
+/* 点击无效：不给按压下沉与提亮反馈 */
 .btn-card.is-blocked:active {
   transform: translateY(-4px) scale(1.02);
+  filter: none;
   transition-duration: 0.26s;
 }
 
@@ -448,22 +491,25 @@ body,
   }
 }
 
+/* 图标：整卡填色后改为半透明「气泡」托底，深浅底色各自适配 */
 .btn-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 19px;
+  font-size: 23px;
   line-height: 1;
-  background: var(--accent-soft, #f0f3fe);
+  color: var(--btn-fg, var(--accent, var(--el-color-primary)));
+  background: var(--bubble, var(--accent-soft, #f0f3fe));
 }
 
 .btn-name {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-main);
+  font-size: var(--btn-size, 12.5px);
+  font-weight: var(--btn-weight, 600);
+  color: var(--btn-fg, var(--text-main));
+  text-shadow: var(--btn-text-shadow, none);
   text-align: center;
   max-width: 100%;
   display: -webkit-box;
@@ -475,7 +521,7 @@ body,
 
 .btn-type {
   font-size: 9.5px;
-  color: var(--text-sub);
+  color: var(--btn-fg-2, var(--text-sub));
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -573,6 +619,17 @@ body,
 
 .btn-card.st-fail::after {
   background: var(--el-color-danger, #f56c6c);
+}
+
+/* 关闭描边：放在各状态规则之后，悬停 / 预览 / 执行状态都不再画边框，仅保留阴影层次 */
+.btn-card.no-border,
+.btn-card.no-border:hover,
+.btn-card.no-border:active,
+.btn-card.st-running.no-border,
+.btn-card.st-success.no-border,
+.btn-card.st-fail.no-border,
+.btn-card.is-preview.no-border:hover {
+  border-color: transparent;
 }
 
 @keyframes running-breathe {
@@ -957,45 +1014,6 @@ body,
 .color-swatch.active {
   border-color: var(--text-main);
   box-shadow: 0 0 0 2px #fff inset;
-}
-
-.icon-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.emoji-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
-  gap: 2px;
-  flex: 1;
-  min-width: 260px;
-  max-height: 156px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-.emoji-item {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 17px;
-  line-height: 1;
-  padding: 4px 0;
-  border-radius: 6px;
-  cursor: pointer;
-  border: 1px solid transparent;
-}
-
-.emoji-item:hover {
-  background: #eef0f4;
-}
-
-.emoji-item.active {
-  border-color: var(--el-color-primary);
-  background: var(--el-color-primary-light-9);
 }
 
 .form-tip {

@@ -29,11 +29,42 @@ export interface ScriptItem {
   order: number
 }
 
+/**
+ * 按钮外观：颜色铺满卡片后的填充与特效（形状固定不变）。
+ * 旧配置没有该字段时按默认值处理。
+ */
+export interface ButtonStyle {
+  /** 填充方式：纯色 / 渐变 */
+  fill: 'solid' | 'gradient'
+  /** 渐变终点色（空串 = 自动取主色的同色系浅色） */
+  color2: string
+  /** 渐变角度 0-360（0 = 向上） */
+  gradientAngle: number
+  /** 特效：无 / 光晕 / 毛玻璃 */
+  effect: 'none' | 'glow' | 'glass'
+  /** 特效强度 0-100（光晕 = 扩散范围，毛玻璃 = 模糊度） */
+  effectLevel: number
+  /** 是否显示卡片描边 */
+  border: boolean
+  /** 字体（CSS font-family 值，空串 = 跟随应用默认） */
+  fontFamily: string
+  /** 字重（按钮名称）：400 常规 / 600 中等 / 800 粗体 */
+  fontWeight: number
+  /** 文字斜体 */
+  fontItalic: boolean
+  /** 名称字号 px（0 = 默认 12.5） */
+  fontSize: number
+  /** 文字颜色（空串 = 按底色亮度自动取黑/白） */
+  textColor: string
+}
+
 export interface ButtonItem {
   id: string
   name: string
   color: string
   icon: string
+  /** 外观（填充 + 特效），旧数据可能缺失 */
+  style?: ButtonStyle
   confirm: boolean
   /** 运行输出中是否显示脚本内容（false = 日志框只显示日志） */
   showScript: boolean
@@ -117,6 +148,7 @@ export interface ButtonFormData {
   name: string
   color: string
   icon: string
+  style: ButtonStyle
   confirm: boolean
   showScript: boolean
   allowConcurrent: boolean

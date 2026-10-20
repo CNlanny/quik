@@ -6,8 +6,10 @@ import { open as openDialog } from '@tauri-apps/plugin-dialog'
 import { useConfigStore } from '../stores/config'
 import CodeEditor from './CodeEditor.vue'
 import CodeBlock from './CodeBlock.vue'
-import { PRESET_COLORS, EMOJIS } from '../constants'
-import type { ActionConfig, ActionType, ButtonFormData, ButtonItem, ShellMode } from '../types'
+import ButtonAppearance from './ButtonAppearance.vue'
+import { PRESET_COLORS } from '../constants'
+import { DEFAULT_BUTTON_STYLE, normalizeButtonStyle } from '../utils/buttonStyle'
+import type { ActionConfig, ActionType, ButtonFormData, ButtonItem, ButtonStyle, ShellMode } from '../types'
 
 const props = defineProps<{
   button: ButtonItem | null
@@ -32,6 +34,7 @@ const form = reactive<{
   name: string
   color: string
   icon: string
+  style: ButtonStyle
   type: ActionType
   shell: ShellMode
   timeoutSec: number
@@ -47,6 +50,7 @@ const form = reactive<{
   name: '',
   color: PRESET_COLORS[0],
   icon: '',
+  style: { ...DEFAULT_BUTTON_STYLE },
   type: 'shell',
   shell: 'auto',
   timeoutSec: 30,
@@ -68,6 +72,7 @@ watch(visible, (v) => {
     form.name = b.name
     form.color = b.color
     form.icon = b.icon
+    form.style = normalizeButtonStyle(b.style)
     form.type = b.action.type
     form.shell = b.action.shell
     form.timeoutSec = b.action.timeoutSec
@@ -84,6 +89,7 @@ watch(visible, (v) => {
     form.name = ''
     form.color = PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)]
     form.icon = ''
+    form.style = { ...DEFAULT_BUTTON_STYLE }
     form.type = 'shell'
     form.shell = 'auto'
     form.timeoutSec = 30
@@ -145,6 +151,7 @@ function save() {
     name: form.name.trim(),
     color: form.color || PRESET_COLORS[0],
     icon: form.icon,
+    style: { ...form.style },
     confirm: form.confirm,
     showScript: form.showScript,
     allowConcurrent: form.allowConcurrent,
@@ -166,7 +173,7 @@ function save() {
     :title="isEdit ? t('buttonDialog.editTitle') : t('buttonDialog.newTitle')"
     class="edit-dialog"
     top="5vh"
-    width="640px"
+    width="680px"
     append-to-body
     :close-on-click-modal="false"
     destroy-on-close
@@ -185,35 +192,14 @@ function save() {
         <el-input v-model="form.name" :placeholder="t('buttonDialog.namePh')" maxlength="60" />
       </el-form-item>
 
-      <el-form-item :label="t('buttonDialog.icon')">
-        <div class="icon-row">
-          <el-input v-model="form.icon" :placeholder="t('buttonDialog.iconPh')" style="width: 110px" />
-          <div class="emoji-list">
-            <span
-              v-for="e in EMOJIS"
-              :key="e"
-              class="emoji-item"
-              :class="{ active: form.icon === e }"
-              @click="form.icon = e"
-            >
-              {{ e }}
-            </span>
-          </div>
-        </div>
-      </el-form-item>
-
-      <el-form-item :label="t('buttonDialog.color')">
-        <div class="color-row">
-          <span
-            v-for="c in PRESET_COLORS"
-            :key="c"
-            class="color-swatch"
-            :class="{ active: form.color === c }"
-            :style="{ backgroundColor: c }"
-            @click="form.color = c"
-          ></span>
-          <el-color-picker v-model="form.color" />
-        </div>
+      <el-form-item :label="t('buttonDialog.appearance')">
+        <ButtonAppearance
+          v-model:icon="form.icon"
+          v-model:color="form.color"
+          v-model:btn-style="form.style"
+          :name="form.name"
+          :type="form.type"
+        />
       </el-form-item>
 
       <el-form-item :label="t('buttonDialog.type')">
