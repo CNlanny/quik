@@ -113,10 +113,13 @@ export default {
     stopDone: '⏹ Process terminated',
     timeoutDone: '⏱ Timeout reached, process terminated',
     copy: 'Copy',
-    clear: 'Clear',
+    clear: 'Clear history',
     collapse: 'Collapse',
     expand: 'Expand',
-    ms: 'ms'
+    ms: 'ms',
+    runningTasks: 'Running',
+    history: 'History',
+    listEmpty: 'No runs yet'
   },
   settings: {
     title: 'Settings',

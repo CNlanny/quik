@@ -30,6 +30,8 @@ export interface RunState {
   exitCode: number | null
   durationMs: number | null
   error: string | null
+  /** 非焦点运行收到新输出时置位，任务列表以圆点提示（切回焦点时清除） */
+  unread: boolean
 }
 
 const MAX_RUNS = 50
@@ -71,6 +73,7 @@ export const useRunnerStore = defineStore('runner', () => {
             if (run.chunks.length > MAX_CHUNKS) {
               run.chunks.splice(0, run.chunks.length - MAX_CHUNKS)
             }
+            if (id !== focusRunId.value) run.unread = true
           }
         }
         pendingChunks.clear()
@@ -128,7 +131,8 @@ export const useRunnerStore = defineStore('runner', () => {
         startedAt: Date.now(),
         exitCode: null,
         durationMs: 0,
-        error: 'script-missing'
+        error: 'script-missing',
+        unread: false
       })
       runs.value.unshift(state)
       focusRunId.value = state.runId
@@ -194,7 +198,8 @@ export const useRunnerStore = defineStore('runner', () => {
       startedAt: Date.now(),
       exitCode: null,
       durationMs: null,
-      error: null
+      error: null,
+      unread: false
     })
     runs.value.unshift(state)
     if (runs.value.length > MAX_RUNS) runs.value.length = MAX_RUNS
@@ -228,6 +233,13 @@ export const useRunnerStore = defineStore('runner', () => {
     }
   }
 
+  /** 切换日志面板关注的运行，并清掉该运行的新输出提示 */
+  function focus(runId: string) {
+    focusRunId.value = runId
+    const run = runs.value.find((r) => r.runId === runId)
+    if (run) run.unread = false
+  }
+
   async function stopFocus() {
     const runId = focusRunId.value
     if (!runId) return
@@ -243,10 +255,13 @@ export const useRunnerStore = defineStore('runner', () => {
     }
   }
 
-  function clearAll() {
-    runs.value = []
-    focusRunId.value = null
+  /** 只清除已结束的运行记录；运行中的任务进程还在跑，必须保留在列表里 */
+  function clearFinished() {
+    runs.value = runs.value.filter((r) => r.status === 'running')
+    if (focusRunId.value && !runs.value.some((r) => r.runId === focusRunId.value)) {
+      focusRunId.value = runs.value[0]?.runId ?? null
+    }
   }
 
-  return { runs, focusRunId, init, runButton, statusOf, stopFocus, clearAll }
+  return { runs, focusRunId, init, runButton, statusOf, focus, stopFocus, clearFinished }
 })

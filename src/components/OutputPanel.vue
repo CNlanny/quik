@@ -15,6 +15,21 @@ const bodyRef = ref<HTMLElement | null>(null)
 
 const run = computed(() => runner.runs.find((r) => r.runId === runner.focusRunId))
 
+// 任务列表：运行中置顶，历史按时间倒序（runs 本身即新→旧）
+const runningRuns = computed(() => runner.runs.filter((r) => r.status === 'running'))
+const historyRuns = computed(() => runner.runs.filter((r) => r.status !== 'running'))
+
+const pad2 = (n: number) => String(n).padStart(2, '0')
+
+function fmtTime(ts: number) {
+  const d = new Date(ts)
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`
+}
+
+function fmtDur(ms: number) {
+  return ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}s`
+}
+
 // 控制台命令行高亮显示实际执行的脚本（含变量替换后的内容）
 const cmdHtml = computed(() => (run.value ? highlightShell(run.value.script) : ''))
 
@@ -37,11 +52,15 @@ const tagType = computed(() => {
   }
 })
 
-// 执行按钮（含面板上的重跑）时自动展开，日志立即可见；手动折叠不被覆盖
+// 执行按钮（含面板上的重跑）时自动展开，日志立即可见；手动折叠不被覆盖；
+// 切换任务时滚动到日志底部（日志阅读习惯是从最新输出看起）
 watch(
   () => runner.focusRunId,
-  (id) => {
+  async (id) => {
     if (id) collapsed.value = false
+    await nextTick()
+    const el = bodyRef.value
+    if (el) el.scrollTop = el.scrollHeight
   }
 )
 
@@ -109,7 +128,7 @@ async function copyAll() {
         </el-button>
         <el-button v-else size="small" @click="rerun">{{ t('output.rerun') }}</el-button>
         <el-button size="small" @click="copyAll">{{ t('output.copy') }}</el-button>
-        <el-button size="small" @click="runner.clearAll()">{{ t('output.clear') }}</el-button>
+        <el-button size="small" @click="runner.clearFinished()">{{ t('output.clear') }}</el-button>
       </template>
       <span v-else class="spacer"></span>
       <el-button size="small" text @click="collapsed = !collapsed">
@@ -117,19 +136,59 @@ async function copyAll() {
       </el-button>
     </div>
 
-    <div v-show="!collapsed" ref="bodyRef" class="output-body">
-      <template v-if="run">
-        <div v-if="run.showScript" class="cmd-line">
-          <span class="cmd-prompt">$</span>
-          <code v-html="cmdHtml"></code>
-        </div>
-        <pre class="out-pre"><span
-          v-for="(c, i) in run.chunks"
-          :key="i"
-          :class="['out-chunk', c.stream]"
-        >{{ c.text }}</span></pre>
-      </template>
-      <div v-else class="output-empty">{{ t('output.empty') }}</div>
+    <div v-show="!collapsed" class="output-flex">
+      <!-- 左侧任务列表：运行中置顶 + 历史倒序，点击切换右侧日志 -->
+      <aside class="run-list">
+        <template v-if="runner.runs.length">
+          <div v-if="runningRuns.length" class="run-group-title">
+            {{ t('output.runningTasks') }} · {{ runningRuns.length }}
+          </div>
+          <div
+            v-for="r in runningRuns"
+            :key="r.runId"
+            class="run-item"
+            :class="{ active: r.runId === runner.focusRunId }"
+            @click="runner.focus(r.runId)"
+          >
+            <span class="run-dot" :class="r.status"></span>
+            <span class="run-item-name">{{ r.buttonName }}</span>
+            <span v-if="r.unread" class="run-unread"></span>
+            <span class="run-item-time">{{ fmtTime(r.startedAt) }}</span>
+          </div>
+          <div v-if="historyRuns.length" class="run-group-title">
+            {{ t('output.history') }} · {{ historyRuns.length }}
+          </div>
+          <div
+            v-for="r in historyRuns"
+            :key="r.runId"
+            class="run-item"
+            :class="{ active: r.runId === runner.focusRunId }"
+            @click="runner.focus(r.runId)"
+          >
+            <span class="run-dot" :class="r.status"></span>
+            <span class="run-item-name">{{ r.buttonName }}</span>
+            <span class="run-item-time">
+              <template v-if="r.durationMs != null">{{ fmtDur(r.durationMs) }} · </template>{{ fmtTime(r.startedAt) }}
+            </span>
+          </div>
+        </template>
+        <div v-else class="run-list-empty">{{ t('output.listEmpty') }}</div>
+      </aside>
+
+      <div ref="bodyRef" class="output-body">
+        <template v-if="run">
+          <div v-if="run.showScript" class="cmd-line">
+            <span class="cmd-prompt">$</span>
+            <code v-html="cmdHtml"></code>
+          </div>
+          <pre class="out-pre"><span
+            v-for="(c, i) in run.chunks"
+            :key="i"
+            :class="['out-chunk', c.stream]"
+          >{{ c.text }}</span></pre>
+        </template>
+        <div v-else class="output-empty">{{ t('output.empty') }}</div>
+      </div>
     </div>
   </div>
 </template>

@@ -113,10 +113,13 @@ export default {
     stopDone: '⏹ 进程已终止',
     timeoutDone: '⏱ 已达超时时间，进程已强制终止',
     copy: '复制',
-    clear: '清空',
+    clear: '清除历史',
     collapse: '收起',
     expand: '展开',
-    ms: 'ms'
+    ms: 'ms',
+    runningTasks: '运行中',
+    history: '历史',
+    listEmpty: '暂无运行任务'
   },
   settings: {
     title: '设置',
