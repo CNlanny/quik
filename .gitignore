@@ -8,3 +8,4 @@ src-tauri/gen/
 # 本地开发调试产物
 .tauri-dev-cdp.json
 .workbuddy/
+.zcode/
