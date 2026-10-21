@@ -80,7 +80,7 @@ Prerequisites:
   - Linux: webkit2gtk and other deps — see the [Tauri 2 prerequisites](https://tauri.app/start/prerequisites/)
 
 ```bash
-git clone https://github.com/your-username/quik.git   # TODO: replace with your repo URL
+git clone https://github.com/CNlanny/quik.git
 cd quik
 npm install          # install frontend dependencies
 npm run tauri dev    # start dev mode

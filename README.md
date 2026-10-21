@@ -80,7 +80,7 @@
   - Linux：webkit2gtk 等依赖，参见 [Tauri 2 前置要求](https://tauri.app/start/prerequisites/)
 
 ```bash
-git clone https://github.com/your-username/quik.git   # TODO: 替换为你的仓库地址
+git clone https://github.com/CNlanny/quik.git
 cd quik
 npm install          # 安装前端依赖
 npm run tauri dev    # 启动开发模式
