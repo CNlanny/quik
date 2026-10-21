@@ -70,6 +70,8 @@ export interface ButtonItem {
   showScript: boolean
   /** 是否允许并发执行（false = 执行中不可再次触发） */
   allowConcurrent: boolean
+  /** 执行结束时是否通过系统通知提醒（成功 / 失败均提醒；旧数据缺省视为关闭） */
+  notify: boolean
   action: ActionConfig
   order: number
 }
@@ -152,5 +154,6 @@ export interface ButtonFormData {
   confirm: boolean
   showScript: boolean
   allowConcurrent: boolean
+  notify: boolean
   action: ActionConfig
 }

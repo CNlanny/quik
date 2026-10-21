@@ -104,6 +104,8 @@ export default {
     showScriptTip: 'When off, the output panel shows logs only, without the executed script',
     allowConcurrentLabel: 'Allow concurrent runs',
     allowConcurrentTip: 'When on, the button can be triggered again while still running; when off, repeated clicks are ignored until it finishes',
+    notifyLabel: 'Desktop notification',
+    notifyTip: 'Notify through an OS notification when the run finishes, whether it succeeded or failed',
     script: 'Script',
     scriptPh: 'curl -s https://example.com\n# multiline & pipes supported, e.g. | jq',
     format: 'Format',
@@ -226,5 +228,8 @@ export default {
   runner: {
     spawnError: 'Failed to start',
     scriptMissing: '⚠ The referenced script no longer exists (probably deleted). Edit the button and pick another script'
+  },
+  notify: {
+    duration: 'took {s}s'
   }
 }

@@ -113,6 +113,12 @@ pub struct Button {
     pub show_script: bool,
     /// 是否允许并发执行；旧配置缺省该字段时保持原行为（执行中不可重复触发）
     pub allow_concurrent: bool,
+    /// 执行结束时是否通过系统通知提醒；旧配置缺省该字段时保持原行为（不提醒）
+    pub notify: bool,
+    /// 按钮外观（填充 + 特效等），schema 由前端维护，这里原样透传避免两端重复定义；
+    /// 旧配置没有该字段时为 None，由前端按默认外观处理
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub style: Option<serde_json::Value>,
     pub action: Action,
     pub order: u32,
 }
@@ -131,6 +137,8 @@ impl Default for Button {
             confirm: false,
             show_script: true,
             allow_concurrent: false,
+            notify: false,
+            style: None,
             action: Default::default(),
             order: 0,
         }
@@ -203,6 +211,8 @@ impl Default for AppConfig {
                         confirm: false,
                         show_script: true,
                         allow_concurrent: false,
+                        notify: false,
+                        style: None,
                         order: 1,
                         action: Action {
                             action_type: "curl".into(),
@@ -219,6 +229,8 @@ impl Default for AppConfig {
                         confirm: false,
                         show_script: true,
                         allow_concurrent: false,
+                        notify: false,
+                        style: None,
                         order: 2,
                         action: Action {
                             action_type: "shell".into(),
@@ -235,6 +247,8 @@ impl Default for AppConfig {
                         confirm: false,
                         show_script: true,
                         allow_concurrent: false,
+                        notify: false,
+                        style: None,
                         order: 3,
                         action: Action {
                             action_type: "script".into(),

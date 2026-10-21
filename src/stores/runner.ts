@@ -8,6 +8,7 @@ import CodeBlock from '../components/CodeBlock.vue'
 import type { ButtonItem, OutputChunk, RunResult } from '../types'
 import { useConfigStore } from './config'
 import { uid } from '../utils'
+import { notifyRunResult } from '../utils/notify'
 
 export type RunStatus = 'running' | 'success' | 'fail' | 'stopped'
 export type ChunkStream = 'stdout' | 'stderr' | 'system'
@@ -230,6 +231,17 @@ export const useRunnerStore = defineStore('runner', () => {
       state.error = String(e)
       state.durationMs = Date.now() - state.startedAt
       appendSystem(state.runId, String(e))
+    }
+
+    // 按钮开启「弹窗提醒」时，执行结束（成功 / 失败 / 停止 / 超时）用系统通知提示；
+    // 旧数据没有 notify 字段视为关闭
+    if (button.notify === true) {
+      void notifyRunResult(
+        button.name,
+        state.status,
+        state.error === 'timeout',
+        state.durationMs
+      )
     }
   }
 

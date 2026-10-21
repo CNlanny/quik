@@ -41,6 +41,7 @@ const form = reactive<{
   confirm: boolean
   showScript: boolean
   allowConcurrent: boolean
+  notify: boolean
   script: string
   scriptId: string
   workdir: string
@@ -57,6 +58,7 @@ const form = reactive<{
   confirm: false,
   showScript: true,
   allowConcurrent: false,
+  notify: false,
   script: '',
   scriptId: '',
   workdir: '',
@@ -79,6 +81,7 @@ watch(visible, (v) => {
     form.confirm = b.confirm
     form.showScript = b.showScript ?? true
     form.allowConcurrent = b.allowConcurrent ?? false
+    form.notify = b.notify === true
     form.script = b.action.script
     form.scriptId = b.action.scriptId ?? ''
     form.workdir = b.action.workdir ?? ''
@@ -96,6 +99,7 @@ watch(visible, (v) => {
     form.confirm = false
     form.showScript = true
     form.allowConcurrent = false
+    form.notify = false
     form.script = ''
     form.scriptId = ''
     form.workdir = ''
@@ -155,6 +159,7 @@ function save() {
     confirm: form.confirm,
     showScript: form.showScript,
     allowConcurrent: form.allowConcurrent,
+    notify: form.notify,
     action
   }
 
@@ -309,6 +314,13 @@ function save() {
         <div>
           <el-switch v-model="form.allowConcurrent" />
           <span class="form-tip">{{ t('buttonDialog.allowConcurrentTip') }}</span>
+        </div>
+      </el-form-item>
+
+      <el-form-item :label="t('buttonDialog.notifyLabel')">
+        <div>
+          <el-switch v-model="form.notify" />
+          <span class="form-tip">{{ t('buttonDialog.notifyTip') }}</span>
         </div>
       </el-form-item>
     </el-form>

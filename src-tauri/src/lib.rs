@@ -10,6 +10,8 @@ use tauri::Manager;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        // 系统弹窗提醒：按钮配置 notify 开启后，执行结束时通过操作系统通知中心提示
+        .plugin(tauri_plugin_notification::init())
         // 开机自启动：注册项由插件维护（Windows 注册表 Run 键 / macOS LaunchAgent / Linux .desktop）
         // 启动参数固定携带 --minimized，开机拉起后静默驻留托盘，不弹主窗口
         .plugin(tauri_plugin_autostart::init(

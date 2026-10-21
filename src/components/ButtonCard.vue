@@ -106,6 +106,7 @@ function onCommand(cmd: string) {
         confirm: props.button.confirm,
         showScript: props.button.showScript,
         allowConcurrent: props.button.allowConcurrent,
+        notify: props.button.notify === true,
         action: { ...props.button.action }
       })
     }

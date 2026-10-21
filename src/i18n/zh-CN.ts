@@ -104,6 +104,8 @@ export default {
     showScriptTip: '关闭后，运行输出中只显示日志，不显示执行的脚本',
     allowConcurrentLabel: '允许并发执行',
     allowConcurrentTip: '开启后执行中可再次点击同时运行；关闭时执行中不可重复触发',
+    notifyLabel: '弹窗提醒',
+    notifyTip: '开启后，执行结束时通过操作系统弹窗提醒（成功或失败均提醒）',
     script: '脚本',
     scriptPh: 'curl -s https://example.com\n# 支持多行与管道，如 | jq',
     format: '格式化',
@@ -226,5 +228,8 @@ export default {
   runner: {
     spawnError: '启动失败',
     scriptMissing: '⚠ 引用的脚本已不存在（可能已被删除），请编辑按钮重新选择脚本'
+  },
+  notify: {
+    duration: '耗时 {s}s'
   }
 }
