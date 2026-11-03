@@ -1,6 +1,8 @@
 export type ActionType = 'curl' | 'shell' | 'script'
 export type ShellMode = 'auto' | 'bash' | 'powershell' | 'cmd'
 export type Language = 'zh-CN' | 'en-US'
+/** 界面主题：浅色 / 深色 / 跟随系统 */
+export type ThemeMode = 'light' | 'dark' | 'system'
 /** 关闭按钮行为：每次询问 / 最小化到托盘 / 直接退出 */
 export type CloseAction = 'ask' | 'tray' | 'exit'
 
@@ -96,6 +98,8 @@ export interface AppSettings {
   defaultShell: ShellMode
   historyLimit: number
   closeAction: CloseAction
+  /** 界面主题；旧配置缺失时按浅色处理 */
+  theme: ThemeMode
 }
 
 export interface AppConfig {

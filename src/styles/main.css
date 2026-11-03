@@ -13,17 +13,78 @@
   --el-color-primary-dark-2: #3e58c4;
   --el-border-radius-base: 8px;
 
-  /* ---- 应用 tokens ---- */
+  /* ---- 应用 tokens（html.dark 下整组覆盖，见文件底部深色主题块） ---- */
   --bg: #eef0f4;
   --panel-bg: #ffffff;
   --border: #e4e7ec;
   --card-border: #e8eaef;
   --text-main: #1f2329;
   --text-sub: #8a919c;
+  /* 次级文字（chips / 只读代码块说明等） */
+  --text-2: #606266;
+  /* 悬停底色：侧栏项 / 分组计数 */
+  --hover-bg: #e6e8ee;
+  --hover-bg-strong: #d9dce3;
+  /* 浅灰表面：代码块顶栏 / 确认框 chips */
+  --surface-1: #f2f3f7;
+  /* 更浅表面：代码块 / 编辑器正文底 */
+  --surface-2: #fafbfd;
+  /* 虚线边框（新建分组 / 新建按钮卡片） */
+  --dashed-border: #b9bec8;
+  /* 半透明底（侧栏「新建分组」按钮） */
+  --ghost-bg: rgba(255, 255, 255, 0.55);
+  /* 滚动条 */
+  --scrollbar-thumb: #c5c9d2;
+  --scrollbar-thumb-hover: #a8adb8;
+  /* 控制台（两种主题下均为深色终端风，不随主题切换） */
   --console-bg: #1b1e24;
   --console-header: #242831;
   --console-text: #d7dae0;
   --console-err: #f14c4c;
+}
+
+/* ===== 深色主题（html.dark 由 utils/theme.ts 切换） =====
+   Element Plus 官方 dark 变量已在 main.ts 引入，这里：
+   1) 把 EP 的底色/边框基调对齐到本应用的面板色，避免弹窗与面板色差突兀；
+   2) dark/css-vars 会把主色重置为 EP 默认蓝，换回品牌蓝并按深底重算 light-x 梯度
+      （深色下 light-x 向深色背景混合，取值反而更深）。 */
+html.dark {
+  /* ---- Element Plus 基调 ---- */
+  --el-bg-color: #1e2128;
+  --el-bg-color-overlay: #232730;
+  --el-bg-color-page: #17191e;
+  --el-fill-color-blank: #1e2128;
+  --el-text-color-primary: #e5e7eb;
+  --el-text-color-regular: #c2c7d0;
+  --el-border-color: #343945;
+  --el-border-color-light: #2e3340;
+  --el-border-color-lighter: #292e3a;
+
+  /* ---- 品牌主色（深底梯度） ---- */
+  --el-color-primary: #5e7ef7;
+  --el-color-primary-light-3: #485eb3;
+  --el-color-primary-light-5: #394985;
+  --el-color-primary-light-7: #2a3358;
+  --el-color-primary-light-8: #232941;
+  --el-color-primary-light-9: #1b1f2b;
+  --el-color-primary-dark-2: #7e98f8;
+
+  /* ---- 应用 tokens ---- */
+  --bg: #17191e;
+  --panel-bg: #1e2128;
+  --border: #2c303a;
+  --card-border: #2f3440;
+  --text-main: #e5e7eb;
+  --text-sub: #8a919c;
+  --text-2: #a8adb8;
+  --hover-bg: #2a2f3a;
+  --hover-bg-strong: #333947;
+  --surface-1: #262b35;
+  --surface-2: #1b1e25;
+  --dashed-border: #3d4350;
+  --ghost-bg: rgba(255, 255, 255, 0.04);
+  --scrollbar-thumb: #3a4150;
+  --scrollbar-thumb-hover: #4a5263;
 }
 
 * {
@@ -121,12 +182,12 @@ body,
   user-select: none;
   font-size: 13.5px;
   margin-bottom: 2px;
-  color: #3d434d;
+  color: var(--text-2);
   transition: background 0.12s, color 0.12s;
 }
 
 .side-item:hover {
-  background: #e6e8ee;
+  background: var(--hover-bg);
 }
 
 .side-item.active {
@@ -158,7 +219,7 @@ body,
 .side-count {
   font-size: 12px;
   color: var(--text-sub);
-  background: #e6e8ee;
+  background: var(--hover-bg);
   border-radius: 10px;
   padding: 0 7px;
   line-height: 18px;
@@ -171,7 +232,7 @@ body,
 
 .side-divider {
   height: 1px;
-  background: #dfe2e8;
+  background: var(--border);
   margin: 8px 4px;
 }
 
@@ -197,16 +258,16 @@ body,
 }
 
 .menu-dots:hover {
-  background: #d9dce3;
+  background: var(--hover-bg-strong);
   color: var(--text-main);
 }
 
 .new-group-btn {
   margin: 8px;
   padding: 8px;
-  border: 1px dashed #b9bec8;
+  border: 1px dashed var(--dashed-border);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--ghost-bg);
   color: var(--text-sub);
   cursor: pointer;
   font-size: 13px;
@@ -287,7 +348,7 @@ body,
 .group-count {
   font-size: 12px;
   color: var(--text-sub);
-  background: #eef0f4;
+  background: var(--hover-bg);
   padding: 0 7px;
   border-radius: 9px;
   line-height: 17px;
@@ -706,7 +767,7 @@ body,
 
 .card-add {
   aspect-ratio: 1;
-  border: 1.5px dashed #b9bec8;
+  border: 1.5px dashed var(--dashed-border);
   border-radius: 10px;
   background: transparent;
   color: var(--text-sub);
@@ -1066,6 +1127,43 @@ body,
   color: #57606a;
 }
 
+/* 深色主题下的语法高亮（GitHub Dark）；输出面板自带深色规则（.output-panel .tok-*），
+   选择器优先级更高，不受这里影响 */
+html.dark .tok-comment {
+  color: #7d8590;
+}
+
+html.dark .tok-kw {
+  color: #ff7b72;
+}
+
+html.dark .tok-cmd,
+html.dark .tok-url,
+html.dark .tok-num {
+  color: #79c0ff;
+}
+
+html.dark .tok-string {
+  color: #7ee787;
+}
+
+html.dark .tok-var {
+  color: #ffa657;
+}
+
+html.dark .tok-env {
+  color: #a5b6ff;
+  background: rgba(126, 156, 255, 0.16);
+}
+
+html.dark .tok-flag {
+  color: #d2a8ff;
+}
+
+html.dark .tok-op {
+  color: #9da5b4;
+}
+
 /* ===== 只读代码块（确认框 / 展示） ===== */
 .code-block {
   width: 100%;
@@ -1079,10 +1177,10 @@ body,
   gap: 8px;
   width: 100%;
   padding: 8px 12px;
-  border: 1px dashed #b9c0cc;
+  border: 1px dashed var(--dashed-border);
   border-radius: 8px;
-  background: #f8f9fc;
-  color: #606266;
+  background: var(--surface-2);
+  color: var(--text-2);
   font-size: 12.5px;
   cursor: pointer;
   transition:
@@ -1107,7 +1205,7 @@ body,
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
-  background: #fafbfd;
+  background: var(--surface-2);
 }
 
 .code-block-bar {
@@ -1115,8 +1213,8 @@ body,
   align-items: center;
   gap: 8px;
   padding: 5px 8px 5px 12px;
-  background: #f2f3f7;
-  border-bottom: 1px solid #e8eaef;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--card-border);
 }
 
 .code-lang-chip {
@@ -1171,7 +1269,7 @@ body,
   width: 2em;
   margin-right: 14px;
   text-align: right;
-  color: #b6bcc7;
+  color: var(--text-sub);
   user-select: none;
 }
 
@@ -1192,7 +1290,7 @@ body,
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
-  background: #fafbfd;
+  background: var(--surface-2);
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
@@ -1208,8 +1306,8 @@ body,
   align-items: center;
   gap: 8px;
   padding: 4px 8px 4px 12px;
-  background: #f2f3f7;
-  border-bottom: 1px solid #e8eaef;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--card-border);
 }
 
 .code-editor-body {
@@ -1258,7 +1356,7 @@ body,
 }
 
 .code-input::placeholder {
-  color: #b3b9c3;
+  color: var(--text-sub);
 }
 
 .code-input::selection {
@@ -1352,9 +1450,9 @@ body,
   line-height: 20px;
   padding: 0 9px;
   border-radius: 10px;
-  background: #f2f3f7;
-  border: 1px solid #e8eaef;
-  color: #606266;
+  background: var(--surface-1);
+  border: 1px solid var(--card-border);
+  color: var(--text-2);
   letter-spacing: 0.3px;
   white-space: nowrap;
 }
@@ -1456,12 +1554,12 @@ body.el-popup-parent--hidden {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c5c9d2;
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8adb8;
+  background: var(--scrollbar-thumb-hover);
 }
 
 ::-webkit-scrollbar-track {

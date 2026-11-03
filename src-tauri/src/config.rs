@@ -16,6 +16,8 @@ pub struct Settings {
     pub history_limit: u32,
     /// 关闭按钮行为：ask（每次询问）/ tray（最小化到托盘）/ exit（直接退出）
     pub close_action: String,
+    /// 界面主题：light / dark / system（跟随系统）；旧配置缺失时按浅色处理
+    pub theme: String,
 }
 
 impl Default for Settings {
@@ -25,6 +27,7 @@ impl Default for Settings {
             default_shell: "auto".into(),
             history_limit: 50,
             close_action: "ask".into(),
+            theme: "light".into(),
         }
     }
 }

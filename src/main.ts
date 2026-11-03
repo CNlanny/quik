@@ -2,9 +2,14 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+import 'element-plus/theme-chalk/dark/css-vars.css'
 import App from './App.vue'
 import { i18n } from './i18n'
+import { initTheme } from './utils/theme'
 import './styles/main.css'
+
+// 挂载前应用缓存的主题，避免深色用户看到闪白
+initTheme()
 
 createApp(App).use(createPinia()).use(i18n).use(ElementPlus).mount('#app')
 

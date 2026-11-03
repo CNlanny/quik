@@ -7,7 +7,7 @@ import { open, save } from '@tauri-apps/plugin-dialog'
 import { disable, enable, isEnabled } from '@tauri-apps/plugin-autostart'
 import { useConfigStore } from '../stores/config'
 import { languages } from '../i18n'
-import type { CloseAction, ImportSummary, Language, ShellInfo, ShellMode } from '../types'
+import type { CloseAction, ImportSummary, Language, ShellInfo, ShellMode, ThemeMode } from '../types'
 
 const emit = defineEmits<{ back: [] }>()
 
@@ -186,6 +186,10 @@ function onLanguageChange(lang: Language) {
   invoke('refresh_tray_menu', { lang })
 }
 
+function onThemeChange(theme: ThemeMode) {
+  config.setTheme(theme)
+}
+
 function onShellChange(shell: ShellMode) {
   config.setDefaultShell(shell)
 }
@@ -238,6 +242,17 @@ async function onAutostartChange(v: boolean | string | number) {
             @update:model-value="onLanguageChange"
           >
             <el-radio v-for="l in languages" :key="l.value" :value="l.value">{{ l.label }}</el-radio>
+          </el-radio-group>
+        </el-form-item>
+
+        <el-form-item :label="t('settings.theme')">
+          <el-radio-group
+            :model-value="config.config?.settings.theme ?? 'light'"
+            @update:model-value="onThemeChange"
+          >
+            <el-radio value="light">{{ t('settings.themeLight') }}</el-radio>
+            <el-radio value="dark">{{ t('settings.themeDark') }}</el-radio>
+            <el-radio value="system">{{ t('settings.themeSystem') }}</el-radio>
           </el-radio-group>
         </el-form-item>
 

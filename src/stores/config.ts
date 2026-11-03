@@ -10,9 +10,11 @@ import type {
   GroupItem,
   Language,
   ScriptItem,
-  ShellMode
+  ShellMode,
+  ThemeMode
 } from '../types'
 import { setLanguage as applyLanguage } from '../i18n'
+import { applyTheme } from '../utils/theme'
 import { uid } from '../utils'
 
 export const useConfigStore = defineStore('config', () => {
@@ -26,6 +28,8 @@ export const useConfigStore = defineStore('config', () => {
   async function init() {
     config.value = await invoke<AppConfig>('load_config')
     if (config.value.settings.language) applyLanguage(config.value.settings.language)
+    // 启动时已按 localStorage 缓存先行应用，这里以配置为准校正（旧配置缺失按浅色）
+    applyTheme(config.value.settings.theme ?? 'light')
     loaded.value = true
   }
 
@@ -229,6 +233,13 @@ export const useConfigStore = defineStore('config', () => {
     persist()
   }
 
+  function setTheme(theme: ThemeMode) {
+    if (!config.value) return
+    config.value.settings.theme = theme
+    applyTheme(theme)
+    persist()
+  }
+
   function setDefaultShell(shell: ShellMode) {
     if (!config.value) return
     config.value.settings.defaultShell = shell
@@ -277,6 +288,7 @@ export const useConfigStore = defineStore('config', () => {
     deleteEnvironment,
     setActiveEnvironment,
     setLanguage,
+    setTheme,
     setDefaultShell,
     setCloseAction,
     reload

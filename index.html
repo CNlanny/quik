@@ -4,6 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quik</title>
+    <script>
+      // 首帧前应用缓存的主题，避免深色用户看到白底闪变（与 utils/theme.ts 的缓存键一致）
+      (function () {
+        try {
+          var mode = localStorage.getItem('quik.theme')
+          var dark =
+            mode === 'dark' ||
+            (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
+          if (dark) {
+            document.documentElement.classList.add('dark')
+            document.documentElement.style.colorScheme = 'dark'
+          }
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>

@@ -422,7 +422,7 @@ const previewClasses = computed(() => buttonFxClasses(btnStyle.value))
   justify-content: center;
   font-size: 20px;
   line-height: 1;
-  background: #f5f7fa;
+  background: var(--surface-1);
   border-radius: 8px;
 }
 
@@ -469,7 +469,7 @@ const previewClasses = computed(() => buttonFxClasses(btnStyle.value))
   padding: 3px 9px;
   font-size: 12px;
   border: 1px solid var(--border);
-  background: #fff;
+  background: var(--panel-bg);
   border-radius: 999px;
   color: var(--text-sub);
   cursor: pointer;
@@ -510,7 +510,7 @@ const previewClasses = computed(() => buttonFxClasses(btnStyle.value))
 }
 
 .icon-grid-item:hover {
-  background: #eef0f4;
+  background: var(--hover-bg);
 }
 
 .icon-grid-item.active {
@@ -551,7 +551,7 @@ const previewClasses = computed(() => buttonFxClasses(btnStyle.value))
   flex: 1;
   height: 22px;
   border-radius: 6px;
-  border: 1px solid rgba(16, 24, 40, 0.08);
+  border: 1px solid var(--border);
 }
 
 .ap-angles {
@@ -567,7 +567,7 @@ const previewClasses = computed(() => buttonFxClasses(btnStyle.value))
   align-items: center;
   justify-content: center;
   border: 1px solid var(--border);
-  background: #fff;
+  background: var(--panel-bg);
   border-radius: 6px;
   color: var(--text-sub);
   cursor: pointer;
@@ -601,7 +601,7 @@ const previewClasses = computed(() => buttonFxClasses(btnStyle.value))
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
-  background: #fff;
+  background: var(--panel-bg);
 }
 
 .ap-seg button {
@@ -683,6 +683,8 @@ const previewClasses = computed(() => buttonFxClasses(btnStyle.value))
 
 /* ---- 实时预览 ---- */
 .ap-preview {
+  /* 点阵颜色用局部变量，深色主题下单独覆盖 */
+  --preview-dot: #d5dae3;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -690,10 +692,14 @@ const previewClasses = computed(() => buttonFxClasses(btnStyle.value))
   gap: 8px;
   padding: 14px 10px;
   border-radius: 12px;
-  background: #f2f4f8;
+  background: var(--surface-1);
   /* 点阵底纹：让毛玻璃/半透明效果在预览里也能看出层次 */
-  background-image: radial-gradient(circle, #d5dae3 1px, transparent 1px);
+  background-image: radial-gradient(circle, var(--preview-dot) 1px, transparent 1px);
   background-size: 12px 12px;
+}
+
+html.dark .ap-preview {
+  --preview-dot: #3a4150;
 }
 
 .ap-preview-tip {
